@@ -1,0 +1,97 @@
+From 7402da86150b0767e6b564e4c844c988544b248c Mon Sep 17 00:00:00 2001
+From: Paul Price <price@astro.princeton.edu>
+Date: Thu, 3 Aug 2017 11:26:01 -0400
+Subject: [PATCH] fix reading of compressed int image after losslessly
+ compressed float image
+
+---
+ imcompress.c | 17 +++++++++--------
+ 1 file changed, 9 insertions(+), 8 deletions(-)
+
+diff --git a/imcompress.c b/imcompress.c
+index 2aee4d8..78da8ed 100644
+--- a/imcompress.c
++++ b/imcompress.c
+@@ -5194,6 +5194,7 @@ int imcomp_get_compressed_image_par(fitsfile *infptr, int *status)
+     if (ffgky(infptr, TSTRING, "ZQUANTIZ", value, NULL, &tstatus) > 0)
+     {
+         (infptr->Fptr)->quantize_method = 0;
++        (infptr->Fptr)->quantize_level = 0;
+     } else {
+ 
+         if (!FSTRCMP(value, "NONE") ) {
+@@ -6279,7 +6280,7 @@ int imcomp_decompress_tile (fitsfile *infptr,
+     {
+         pixlen = sizeof(short);
+ 
+-	if ((infptr->Fptr)->quantize_level == NO_QUANTIZE) {
++	if (infptr->Fptr->zbitpix < 0 && (infptr->Fptr)->quantize_level == NO_QUANTIZE) {
+ 	 /* the floating point pixels were losselessly compressed with GZIP */
+ 	 /* Just have to copy the values to the output array */
+ 	 
+@@ -6331,7 +6332,7 @@ int imcomp_decompress_tile (fitsfile *infptr,
+     {
+         pixlen = sizeof(int);
+ 
+-	if ((infptr->Fptr)->quantize_level == NO_QUANTIZE) {
++	if (infptr->Fptr->zbitpix < 0 && (infptr->Fptr)->quantize_level == NO_QUANTIZE) {
+ 	 /* the floating point pixels were losselessly compressed with GZIP */
+ 	 /* Just have to copy the values to the output array */
+ 	 
+@@ -6361,7 +6362,7 @@ int imcomp_decompress_tile (fitsfile *infptr,
+     {
+         pixlen = sizeof(long);
+ 
+-	if ((infptr->Fptr)->quantize_level == NO_QUANTIZE) {
++    if (infptr->Fptr->zbitpix < 0 && (infptr->Fptr)->quantize_level == NO_QUANTIZE) {
+ 	 /* the floating point pixels were losselessly compressed with GZIP */
+ 	 /* Just have to copy the values to the output array */
+ 	 
+@@ -6394,7 +6395,7 @@ int imcomp_decompress_tile (fitsfile *infptr,
+ 	      fnulval = *(float *) nulval;
+ 	}
+  
+-	if ((infptr->Fptr)->quantize_level == NO_QUANTIZE) {
++    if (infptr->Fptr->zbitpix < 0 && (infptr->Fptr)->quantize_level == NO_QUANTIZE) {
+ 	 /* the floating point pixels were losselessly compressed with GZIP */
+ 	 /* Just have to copy the values to the output array */
+ 	 
+@@ -6452,7 +6453,7 @@ int imcomp_decompress_tile (fitsfile *infptr,
+ 	     dnulval = *(double *) nulval;
+ 	}
+ 
+-	if ((infptr->Fptr)->quantize_level == NO_QUANTIZE) {
++    if (infptr->Fptr->zbitpix < 0 && (infptr->Fptr)->quantize_level == NO_QUANTIZE) {
+ 	 /* the floating point pixels were losselessly compressed with GZIP */
+ 	 /* Just have to copy the values to the output array */
+ 
+@@ -6538,7 +6539,7 @@ int imcomp_decompress_tile (fitsfile *infptr,
+     {
+         pixlen = sizeof(short);
+ 
+-	if ((infptr->Fptr)->quantize_level == NO_QUANTIZE) {
++    if (infptr->Fptr->zbitpix < 0 && (infptr->Fptr)->quantize_level == NO_QUANTIZE) {
+ 	 /* the floating point pixels were losselessly compressed with GZIP */
+ 	 /* Just have to copy the values to the output array */
+ 	 
+@@ -6568,7 +6569,7 @@ int imcomp_decompress_tile (fitsfile *infptr,
+     {
+         pixlen = sizeof(int);
+ 
+-	if ((infptr->Fptr)->quantize_level == NO_QUANTIZE) {
++    if (infptr->Fptr->zbitpix < 0 && (infptr->Fptr)->quantize_level == NO_QUANTIZE) {
+ 	 /* the floating point pixels were losselessly compressed with GZIP */
+ 	 /* Just have to copy the values to the output array */
+ 	 
+@@ -6598,7 +6599,7 @@ int imcomp_decompress_tile (fitsfile *infptr,
+     {
+         pixlen = sizeof(long);
+ 
+-	if ((infptr->Fptr)->quantize_level == NO_QUANTIZE) {
++    if (infptr->Fptr->zbitpix < 0 && (infptr->Fptr)->quantize_level == NO_QUANTIZE) {
+ 	 /* the floating point pixels were losselessly compressed with GZIP */
+ 	 /* Just have to copy the values to the output array */
+ 	 
+-- 
+2.13.4
+
