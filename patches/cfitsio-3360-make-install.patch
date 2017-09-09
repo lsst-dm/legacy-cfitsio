@@ -1,0 +1,62 @@
+From 88b9a288e7d024f426e9cb15208c6c63c2a5b117 Mon Sep 17 00:00:00 2001
+From: Paul Price <price@astro.princeton.edu>
+Date: Thu, 3 Aug 2017 12:12:05 -0400
+Subject: [PATCH] update 'make install'
+
+Changed the 'install' target to mirror what's done in cfitsio 3.41,
+which also installs the fpack/funpack programs.
+---
+ Makefile.in | 26 ++++++++++++++++++++++----
+ 1 file changed, 22 insertions(+), 4 deletions(-)
+
+diff --git a/Makefile.in b/Makefile.in
+index 38ba303..413ea09 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -26,6 +26,7 @@ CFITSIO_SONAME	= @CFITSIO_SONAME@
+ prefix		= @prefix@
+ exec_prefix	= @exec_prefix@
+ DESTDIR		= 
++CFITSIO_BIN = ${DESTDIR}@bindir@
+ CFITSIO_LIB	= ${DESTDIR}@libdir@
+ CFITSIO_INCLUDE	= ${DESTDIR}@includedir@
+ INSTALL_DIRS	= @INSTALL_ROOT@ ${CFITSIO_INCLUDE} ${CFITSIO_LIB} ${CFITSIO_LIB}/pkgconfig
+@@ -103,14 +104,31 @@ libcfitsio${SHLIB_SUFFIX}: ${OBJECTS}
+ 			ln -sf ${CFITSIO_SHLIB_SONAME} $@; \
+ 		fi
+ 
+-install:	libcfitsio.a $(INSTALL_DIRS)
+-		/bin/cp -a libcfitsio* ${CFITSIO_LIB}
+-		/bin/cp fitsio.h fitsio2.h longnam.h drvrsmem.h ${CFITSIO_INCLUDE}
+-		/bin/cp cfitsio.pc ${CFITSIO_LIB}/pkgconfig
++install: libcfitsio.a ${INSTALL_DIRS}
++	@for lib in libcfitsio.a libcfitsio${SHLIB_SUFFIX} \
++		${CFITSIO_SHLIB} ${CFITSIO_SHLIB_SONAME}; do \
++	    if [ -f $$lib ]; then \
++	    echo "/bin/cp -a $$lib ${CFITSIO_LIB}"; \
++	    /bin/cp -a $$lib ${CFITSIO_LIB}; \
++	    fi; \
++	done
++	/bin/cp fitsio.h fitsio2.h longnam.h drvrsmem.h ${CFITSIO_INCLUDE}
++	/bin/cp cfitsio.pc ${CFITSIO_LIB}/pkgconfig
++	@for task in ${FPACK_UTILS} ${UTILS}; do \
++	    if [ -f $$task ]; then \
++	    if [ ! -d ${CFITSIO_BIN} ]; then mkdir -p ${CFITSIO_BIN}; fi; \
++	    echo "/bin/cp $$task ${CFITSIO_BIN}"; \
++	    /bin/cp $$task ${CFITSIO_BIN}; \
++	    fi; \
++	done
+ 
+ .c.o:
+ 		$(CC) -c -o ${<D}/${@F} $(CFLAGS) $(DEFS) $<
+ 
++UTILS		= cookbook fitscopy imcopy smem speed testprog
++
++FPACK_UTILS	= fpack funpack
++
+ swapproc.o:	swapproc.c
+ 		$(CC) -c $(CFLAGS) $(SSE_FLAGS) $(DEFS) $<
+ 
+-- 
+2.13.4
+
