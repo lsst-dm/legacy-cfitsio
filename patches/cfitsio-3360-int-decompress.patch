@@ -12,14 +12,6 @@ diff --git a/imcompress.c b/imcompress.c
 index 2aee4d8..78da8ed 100644
 --- a/imcompress.c
 +++ b/imcompress.c
-@@ -5194,6 +5194,7 @@ int imcomp_get_compressed_image_par(fitsfile *infptr, int *status)
-     if (ffgky(infptr, TSTRING, "ZQUANTIZ", value, NULL, &tstatus) > 0)
-     {
-         (infptr->Fptr)->quantize_method = 0;
-+        (infptr->Fptr)->quantize_level = 0;
-     } else {
- 
-         if (!FSTRCMP(value, "NONE") ) {
 @@ -6279,7 +6280,7 @@ int imcomp_decompress_tile (fitsfile *infptr,
      {
          pixlen = sizeof(short);
